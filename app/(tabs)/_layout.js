@@ -1,5 +1,5 @@
-import { Ionicons } from '@expo/vector-icons';
-import { Tabs } from 'expo-router';
+import { Ionicons } from "@expo/vector-icons";
+import { Tabs } from "expo-router";
 
 export default function TabLayout() {
   return (
@@ -7,7 +7,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="pedidos"
         options={{
-          title: 'Pedidos',
+          title: "Pedidos",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="list-outline" size={size} color={color} />
           ),
@@ -16,7 +16,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="clientes"
         options={{
-          title: 'Clientes',
+          title: "Clientes",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="people-outline" size={size} color={color} />
           ),
@@ -25,7 +25,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="repartidores"
         options={{
-          title: 'Repartidores',
+          title: "Repartidores",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="people-outline" size={size} color={color} />
           ),
@@ -34,7 +34,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="perfil"
         options={{
-          title: 'Perfil',
+          title: "Perfil",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="people-outline" size={size} color={color} />
           ),

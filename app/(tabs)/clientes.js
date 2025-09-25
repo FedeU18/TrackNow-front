@@ -8,7 +8,6 @@ export default function ClientesScreen() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Cambia la IP por la de tu PC donde corre Strapi
     axios
       .get("http://192.168.0.10:1337/api/clientes?populate=*")
       .then((res) => setClientes(res.data.data))
@@ -16,17 +15,20 @@ export default function ClientesScreen() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading)
+  if (loading) {
     return <ActivityIndicator animating={true} style={{ marginTop: 20 }} />;
+  }
 
   return (
     <ScrollView style={styles.container}>
-      {clientes.map((cliente: any) => (
+      {clientes.map((cliente) => (
         <Card key={cliente.id} style={styles.card}>
           <Card.Content>
             <Title>{cliente.attributes.nombre}</Title>
             <Paragraph>Email: {cliente.attributes.email || "N/A"}</Paragraph>
-            <Paragraph>Teléfono: {cliente.attributes.telefono || "N/A"}</Paragraph>
+            <Paragraph>
+              Teléfono: {cliente.attributes.telefono || "N/A"}
+            </Paragraph>
           </Card.Content>
         </Card>
       ))}

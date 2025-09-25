@@ -2,17 +2,22 @@ import axios from "axios";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { ScrollView, StyleSheet } from "react-native";
-import { ActivityIndicator, Button, Card, Paragraph, Title } from "react-native-paper";
+import {
+  ActivityIndicator,
+  Button,
+  Card,
+  Paragraph,
+  Title,
+} from "react-native-paper";
 
 export default function DetallePedidoScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id } = useLocalSearchParams();
   const router = useRouter();
-  const [pedido, setPedido] = useState<any>(null);
+  const [pedido, setPedido] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (id) {
-      // Cambia la IP por la de tu PC donde corre Strapi
       axios
         .get(`http://192.168.0.10:1337/api/pedidos/${id}?populate=*`)
         .then((res) => {
@@ -51,31 +56,31 @@ export default function DetallePedidoScreen() {
         <Card.Content>
           <Title>Pedido #{pedido.id}</Title>
           <Paragraph style={styles.detail}>
-            <strong>Estado: </strong>
-            {pedido.attributes.estado_pedido?.data?.attributes?.nombre || "Sin estado"}
+            <TextBold>Estado: </TextBold>
+            {pedido.attributes.estado_pedido?.data?.attributes?.nombre ||
+              "Sin estado"}
           </Paragraph>
           <Paragraph style={styles.detail}>
-            <strong>Cliente: </strong>
+            <TextBold>Cliente: </TextBold>
             {pedido.attributes.cliente?.data?.attributes.nombre || "N/A"}
           </Paragraph>
           <Paragraph style={styles.detail}>
-            <strong>Fecha: </strong>
-            {pedido.attributes.createdAt ? 
-              new Date(pedido.attributes.createdAt).toLocaleDateString() : 
-              "N/A"
-            }
+            <TextBold>Fecha: </TextBold>
+            {pedido.attributes.createdAt
+              ? new Date(pedido.attributes.createdAt).toLocaleDateString()
+              : "N/A"}
           </Paragraph>
           {pedido.attributes.descripcion && (
             <Paragraph style={styles.detail}>
-              <strong>Descripción: </strong>
+              <TextBold>Descripción: </TextBold>
               {pedido.attributes.descripcion}
             </Paragraph>
           )}
         </Card.Content>
       </Card>
 
-      <Button 
-        mode="contained" 
+      <Button
+        mode="contained"
         style={styles.backButton}
         onPress={() => router.back()}
       >
@@ -83,6 +88,12 @@ export default function DetallePedidoScreen() {
       </Button>
     </ScrollView>
   );
+}
+
+import { Text } from "react-native";
+
+function TextBold({ children }) {
+  return <Text style={{ fontWeight: "bold" }}>{children}</Text>;
 }
 
 const styles = StyleSheet.create({

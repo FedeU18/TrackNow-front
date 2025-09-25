@@ -4,36 +4,15 @@ import React, { useEffect, useState } from "react";
 import { ScrollView, StyleSheet } from "react-native";
 import { ActivityIndicator, Button, Card, Text } from "react-native-paper";
 
-type Pedido = {
-  id: number;
-  attributes: {
-    estado_pedido?: {
-      data?: {
-        attributes?: {
-          nombre?: string;
-        };
-      };
-    };
-    cliente?: {
-      data?: {
-        attributes: {
-          nombre?: string;
-        };
-      };
-    };
-  };
-};
-
 export default function PedidosScreen() {
-  const [pedidos, setPedidos] = useState<Pedido[]>([]);
+  const [pedidos, setPedidos] = useState([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    // Cambia la IP por la de tu PC donde corre Strapi
     const fetchPedidos = async () => {
       try {
-        const res = await axios.get<{ data: Pedido[] }>(
+        const res = await axios.get(
           "http://192.168.0.10:1337/api/pedidos?populate=*"
         );
         setPedidos(res.data.data);
@@ -46,16 +25,20 @@ export default function PedidosScreen() {
     fetchPedidos();
   }, []);
 
-  const handleVerDetalle = (id: number) => {
-    router.push({ pathname: "/detalle-pedido/[id]", params: { id: String(id) } });
+  const handleVerDetalle = (id) => {
+    router.push({
+      pathname: "/detalle-pedido/[id]",
+      params: { id: String(id) },
+    });
   };
 
   const handleCrearPedido = () => {
     router.push({ pathname: "/(tabs)/crear-pedido" });
   };
 
-  if (loading)
+  if (loading) {
     return <ActivityIndicator animating={true} style={{ marginTop: 20 }} />;
+  }
 
   return (
     <ScrollView style={styles.container}>
@@ -81,9 +64,7 @@ export default function PedidosScreen() {
             </Text>
           </Card.Content>
           <Card.Actions>
-            <Button onPress={() => handleVerDetalle(p.id)}>
-              Ver Detalle
-            </Button>
+            <Button onPress={() => handleVerDetalle(p.id)}>Ver Detalle</Button>
           </Card.Actions>
         </Card>
       ))}
