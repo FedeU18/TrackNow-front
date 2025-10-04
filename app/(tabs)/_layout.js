@@ -5,7 +5,16 @@ export default function TabLayout() {
   return (
     <Tabs>
       <Tabs.Screen
-        name="pedidos"
+        name="inicio"
+        options={{
+          title: "Inicio",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="home-outline" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="ver-pedidos"
         options={{
           title: "Pedidos",
           tabBarIcon: ({ color, size }) => (
@@ -14,29 +23,20 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="clientes"
+        name="gestion-pedidos"
         options={{
-          title: "Clientes",
+          title: "Gestión",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="people-outline" size={size} color={color} />
+            <Ionicons name="settings-outline" size={size} color={color} />
           ),
         }}
       />
       <Tabs.Screen
-        name="repartidores"
+        name="ver-calificaciones"
         options={{
-          title: "Repartidores",
+          title: "Calificaciones",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="people-outline" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="perfil"
-        options={{
-          title: "Perfil",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="people-outline" size={size} color={color} />
+            <Ionicons name="star-outline" size={size} color={color} />
           ),
         }}
       />
