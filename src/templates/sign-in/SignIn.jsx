@@ -21,17 +21,21 @@ import {
   FacebookIcon,
   SitemarkIcon,
 } from "./components/CustomIcons";
-
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
   alignSelf: "center",
-  width: "100%",
+  width: "100%", // Asegura que ocupe todo el ancho disponible
+  maxWidth: "700px", // Incrementar el ancho máximo
+  minWidth: "400px", // Establecer un ancho mínimo para pantallas pequeñas
   padding: theme.spacing(4),
   gap: theme.spacing(2),
   margin: "auto",
   [theme.breakpoints.up("sm")]: {
-    maxWidth: "450px",
+    width: "90%", // Ajustar el ancho para pantallas pequeñas
+  },
+  [theme.breakpoints.up("md")]: {
+    width: "80%", // Ajustar el ancho para pantallas medianas
   },
   boxShadow:
     "hsla(220, 30%, 5%, 0.05) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.05) 0px 15px 35px -5px",
@@ -44,6 +48,7 @@ const Card = styled(MuiCard)(({ theme }) => ({
 const SignInContainer = styled(Stack)(({ theme }) => ({
   height: "calc((1 - var(--template-frame-height, 0)) * 100dvh)",
   minHeight: "100%",
+  maxWidth: "100%",
   padding: theme.spacing(2),
   [theme.breakpoints.up("sm")]: {
     padding: theme.spacing(4),
