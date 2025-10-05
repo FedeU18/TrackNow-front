@@ -16,3 +16,16 @@
   display: flex;
   gap: 1rem;
 }
+
+.home-button {
+  padding: 12px 24px !important;
+  font-size: 1.1rem !important;
+  border-radius: 16px !important;
+}
+
+.home-button:hover {
+  background-color: #d79141 !important;
+  color: white !important;
+  border-color: #d79141 !important;
+  box-shadow: 0 4px 12px rgba(215, 145, 65, 0.3) !important;
+}

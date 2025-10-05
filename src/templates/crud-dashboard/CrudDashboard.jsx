@@ -1,6 +1,6 @@
 import * as React from 'react';
 import CssBaseline from '@mui/material/CssBaseline';
-import { createHashRouter, RouterProvider } from 'react-router';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import DashboardLayout from './components/DashboardLayout';
 import EmployeeList from './components/EmployeeList';
 import EmployeeShow from './components/EmployeeShow';
@@ -16,35 +16,6 @@ import {
   formInputCustomizations,
 } from './theme/customizations';
 
-const router = createHashRouter([
-  {
-    Component: DashboardLayout,
-    children: [
-      {
-        path: '/employees',
-        Component: EmployeeList,
-      },
-      {
-        path: '/employees/:employeeId',
-        Component: EmployeeShow,
-      },
-      {
-        path: '/employees/new',
-        Component: EmployeeCreate,
-      },
-      {
-        path: '/employees/:employeeId/edit',
-        Component: EmployeeEdit,
-      },
-      // Fallback route for the example routes in dashboard sidebar items
-      {
-        path: '*',
-        Component: EmployeeList,
-      },
-    ],
-  },
-]);
-
 const themeComponents = {
   ...dataGridCustomizations,
   ...datePickersCustomizations,
@@ -58,7 +29,15 @@ export default function CrudDashboard(props) {
       <CssBaseline enableColorScheme />
       <NotificationsProvider>
         <DialogsProvider>
-          <RouterProvider router={router} />
+          <DashboardLayout>
+            <Routes>
+              <Route path="/admin-dashboard/employees" element={<EmployeeList />} />
+              <Route path="/admin-dashboard/employees/:employeeId" element={<EmployeeShow />} />
+              <Route path="/admin-dashboard/employees/new" element={<EmployeeCreate />} />
+              <Route path="/admin-dashboard/employees/:employeeId/edit" element={<EmployeeEdit />} />
+              <Route path="/admin-dashboard/*" element={<Navigate to="/admin-dashboard/employees" replace />} />
+            </Routes>
+          </DashboardLayout>
         </DialogsProvider>
       </NotificationsProvider>
     </AppTheme>

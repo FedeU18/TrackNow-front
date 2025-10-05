@@ -143,18 +143,18 @@ export default function EmployeeList() {
 
   const handleRowClick = React.useCallback(
     ({ row }) => {
-      navigate(`/employees/${row.id}`);
+      navigate(`/admin-dashboard/employees/${row.id}`);
     },
     [navigate],
   );
 
   const handleCreateClick = React.useCallback(() => {
-    navigate('/employees/new');
+    navigate('/admin-dashboard/employees/new');
   }, [navigate]);
 
   const handleRowEdit = React.useCallback(
     (employee) => () => {
-      navigate(`/employees/${employee.id}/edit`);
+      navigate(`/admin-dashboard/employees/${employee.id}/edit`);
     },
     [navigate],
   );

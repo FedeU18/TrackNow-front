@@ -132,9 +132,10 @@ export default function SignIn(props) {
           <Typography
             component="h1"
             variant="h4"
+            color="primary"
             sx={{ width: "100%", fontSize: "clamp(2rem, 10vw, 2.15rem)" }}
           >
-            Login
+            Iniciar sesión
           </Typography>
           <Box
             component="form"
@@ -191,8 +192,9 @@ export default function SignIn(props) {
               fullWidth
               variant="contained"
               onClick={validateInputs}
+              color="secondary"
             >
-              Login
+              Iniciar sesión
             </Button>
             <Link
               component="button"
@@ -210,7 +212,7 @@ export default function SignIn(props) {
               sx={{ mt: 2 }}
               onClick={() => navigate("/")}
             >
-                Volver al Home
+                Volver al Inicio
             </Button>
           </Box>
           <Divider>or</Divider>

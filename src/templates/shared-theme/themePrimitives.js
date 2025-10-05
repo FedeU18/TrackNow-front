@@ -5,16 +5,16 @@ const defaultTheme = createTheme();
 const customShadows = [...defaultTheme.shadows];
 
 export const brand = {
-  50: 'hsl(210, 100%, 95%)',
-  100: 'hsl(210, 100%, 92%)',
-  200: 'hsl(210, 100%, 80%)',
-  300: 'hsl(210, 100%, 65%)',
-  400: 'hsl(210, 98%, 48%)',
-  500: 'hsl(210, 98%, 42%)',
-  600: 'hsl(210, 98%, 55%)',
-  700: 'hsl(210, 100%, 35%)',
-  800: 'hsl(210, 100%, 16%)',
-  900: 'hsl(210, 100%, 21%)',
+  50: '#fef7e6',  // Dorado muy claro
+  100: '#fdecc0', // Dorado claro
+  200: '#fce096', // Dorado medio-claro
+  300: '#fcc47a', // Tu colorSecundario (dorado claro)
+  400: '#d79141', // Tu colorPrimario (dorado principal)
+  500: '#c1822b', // Dorado más oscuro
+  600: '#a86f1f', // Dorado oscuro
+  700: '#8f5c15', // Dorado muy oscuro
+  800: '#6d4410', // Dorado extremo
+  900: '#4a2e0b', // Dorado casi negro
 };
 
 export const gray = {
@@ -69,6 +69,34 @@ export const red = {
   900: 'hsl(0, 93%, 6%)',
 };
 
+// Nueva paleta azul para TrackNow
+export const trackNowBlue = {
+  50: '#f0f3fb',  // Azul muy claro
+  100: '#dae3f4', // Azul claro  
+  200: '#c4d2ed', // Azul medio-claro
+  300: '#9ca4c4', // Tu colorQuintario (azul claro)
+  400: '#546ca1', // Tu colorCuaternario (azul medio)
+  500: '#0f1c54', // Tu colorTerciario (azul oscuro principal)
+  600: '#0e1a4b', // Azul más oscuro
+  700: '#0c1641', // Azul muy oscuro
+  800: '#0a1337', // Azul extremo
+  900: '#070c26', // Azul casi negro
+};
+
+// Paleta marrón/accent
+export const trackNowBrown = {
+  50: '#f5f3f3',
+  100: '#e6e0e0', 
+  200: '#d4cccc',
+  300: '#c2b7b7',
+  400: '#b3a3a3',
+  500: '#6c5050', // Tu colorSexto (marrón)
+  600: '#5e4646',
+  700: '#4f3c3c', 
+  800: '#403232',
+  900: '#2d2323',
+};
+
 export const getDesignTokens = (mode) => {
   customShadows[1] =
     mode === 'dark'
@@ -79,27 +107,39 @@ export const getDesignTokens = (mode) => {
     palette: {
       mode,
       primary: {
-        light: brand[200],
+        light: brand[300],
         main: brand[400],
-        dark: brand[700],
-        contrastText: brand[50],
+        dark: brand[600],
+        contrastText: '#ffffff',
         ...(mode === 'dark' && {
-          contrastText: brand[50],
+          contrastText: '#ffffff',
           light: brand[300],
           main: brand[400],
-          dark: brand[700],
+          dark: brand[600],
+        }),
+      },
+      secondary: {
+        light: trackNowBlue[300],
+        main: trackNowBlue[500],
+        dark: trackNowBlue[700],
+        contrastText: '#ffffff',
+        ...(mode === 'dark' && {
+          contrastText: '#ffffff',
+          light: trackNowBlue[300],
+          main: trackNowBlue[500],
+          dark: trackNowBlue[700],
         }),
       },
       info: {
-        light: brand[100],
-        main: brand[300],
-        dark: brand[600],
-        contrastText: gray[50],
+        light: trackNowBlue[100],
+        main: trackNowBlue[400],
+        dark: trackNowBlue[600],
+        contrastText: '#ffffff',
         ...(mode === 'dark' && {
-          contrastText: brand[300],
-          light: brand[500],
-          main: brand[700],
-          dark: brand[900],
+          contrastText: '#ffffff',
+          light: trackNowBlue[400],
+          main: trackNowBlue[500],
+          dark: trackNowBlue[800],
         }),
       },
       warning: {
@@ -219,16 +259,22 @@ export const colorSchemes = {
   light: {
     palette: {
       primary: {
-        light: brand[200],
-        main: brand[400],
-        dark: brand[700],
-        contrastText: brand[50],
+        light: brand[300],  // Dorado claro
+        main: brand[400],   // Dorado principal
+        dark: brand[600],   // Dorado oscuro
+        contrastText: '#ffffff',
+      },
+      secondary: {
+        light: trackNowBlue[300], // Azul claro
+        main: trackNowBlue[500],  // Azul oscuro principal
+        dark: trackNowBlue[700],  // Azul muy oscuro
+        contrastText: '#ffffff',
       },
       info: {
-        light: brand[100],
-        main: brand[300],
-        dark: brand[600],
-        contrastText: gray[50],
+        light: trackNowBlue[100],
+        main: trackNowBlue[400],  // Azul medio
+        dark: trackNowBlue[600],
+        contrastText: '#ffffff',
       },
       warning: {
         light: orange[300],
@@ -269,16 +315,22 @@ export const colorSchemes = {
   dark: {
     palette: {
       primary: {
-        contrastText: brand[50],
+        contrastText: '#ffffff',
         light: brand[300],
         main: brand[400],
-        dark: brand[700],
+        dark: brand[600],
+      },
+      secondary: {
+        contrastText: '#ffffff',
+        light: trackNowBlue[300],
+        main: trackNowBlue[500],
+        dark: trackNowBlue[700],
       },
       info: {
-        contrastText: brand[300],
-        light: brand[500],
-        main: brand[700],
-        dark: brand[900],
+        contrastText: '#ffffff',
+        light: trackNowBlue[400],
+        main: trackNowBlue[500],
+        dark: trackNowBlue[800],
       },
       warning: {
         light: orange[400],

@@ -1,4 +1,5 @@
 import * as React from 'react';
+import PropTypes from 'prop-types';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -8,56 +9,40 @@ import {
   getOne as getEmployee,
   updateOne as updateEmployee,
   validate as validateEmployee,
-  type Employee,
 } from '../data/employees';
-import EmployeeForm, {
-  type FormFieldValue,
-  type EmployeeFormState,
-} from './EmployeeForm';
+import EmployeeForm from './EmployeeForm';
 import PageContainer from './PageContainer';
 
-function EmployeeEditForm({
-  initialValues,
-  onSubmit,
-}: {
-  initialValues: Partial<EmployeeFormState['values']>;
-  onSubmit: (formValues: Partial<EmployeeFormState['values']>) => Promise<void>;
-}) {
+function EmployeeEditForm({ initialValues, onSubmit }) {
   const { employeeId } = useParams();
   const navigate = useNavigate();
 
   const notifications = useNotifications();
 
-  const [formState, setFormState] = React.useState<EmployeeFormState>(() => ({
+  const [formState, setFormState] = React.useState(() => ({
     values: initialValues,
     errors: {},
   }));
   const formValues = formState.values;
   const formErrors = formState.errors;
 
-  const setFormValues = React.useCallback(
-    (newFormValues: Partial<EmployeeFormState['values']>) => {
-      setFormState((previousState) => ({
-        ...previousState,
-        values: newFormValues,
-      }));
-    },
-    [],
-  );
+  const setFormValues = React.useCallback((newFormValues) => {
+    setFormState((previousState) => ({
+      ...previousState,
+      values: newFormValues,
+    }));
+  }, []);
 
-  const setFormErrors = React.useCallback(
-    (newFormErrors: Partial<EmployeeFormState['errors']>) => {
-      setFormState((previousState) => ({
-        ...previousState,
-        errors: newFormErrors,
-      }));
-    },
-    [],
-  );
+  const setFormErrors = React.useCallback((newFormErrors) => {
+    setFormState((previousState) => ({
+      ...previousState,
+      errors: newFormErrors,
+    }));
+  }, []);
 
   const handleFormFieldChange = React.useCallback(
-    (name: keyof EmployeeFormState['values'], value: FormFieldValue) => {
-      const validateField = async (values: Partial<EmployeeFormState['values']>) => {
+    (name, value) => {
+      const validateField = async (values) => {
         const { issues } = validateEmployee(values);
         setFormErrors({
           ...formErrors,
@@ -94,15 +79,12 @@ function EmployeeEditForm({
         autoHideDuration: 3000,
       });
 
-      navigate('/employees');
+      navigate('/admin-dashboard/employees');
     } catch (editError) {
-      notifications.show(
-        `Failed to edit employee. Reason: ${(editError as Error).message}`,
-        {
-          severity: 'error',
-          autoHideDuration: 3000,
-        },
-      );
+      notifications.show(`Failed to edit employee. Reason: ${editError.message}`, {
+        severity: 'error',
+        autoHideDuration: 3000,
+      });
       throw editError;
     }
   }, [formValues, navigate, notifications, onSubmit, setFormErrors]);
@@ -114,17 +96,28 @@ function EmployeeEditForm({
       onSubmit={handleFormSubmit}
       onReset={handleFormReset}
       submitButtonLabel="Save"
-      backButtonPath={`/employees/${employeeId}`}
+      backButtonPath={`/admin-dashboard/employees/${employeeId}`}
     />
   );
 }
 
+EmployeeEditForm.propTypes = {
+  initialValues: PropTypes.shape({
+    age: PropTypes.number,
+    isFullTime: PropTypes.bool,
+    joinDate: PropTypes.string,
+    name: PropTypes.string,
+    role: PropTypes.oneOf(['Development', 'Finance', 'Market']),
+  }).isRequired,
+  onSubmit: PropTypes.func.isRequired,
+};
+
 export default function EmployeeEdit() {
   const { employeeId } = useParams();
 
-  const [employee, setEmployee] = React.useState<Employee | null>(null);
+  const [employee, setEmployee] = React.useState(null);
   const [isLoading, setIsLoading] = React.useState(true);
-  const [error, setError] = React.useState<Error | null>(null);
+  const [error, setError] = React.useState(null);
 
   const loadData = React.useCallback(async () => {
     setError(null);
@@ -135,7 +128,7 @@ export default function EmployeeEdit() {
 
       setEmployee(showData);
     } catch (showDataError) {
-      setError(showDataError as Error);
+      setError(showDataError);
     }
     setIsLoading(false);
   }, [employeeId]);
@@ -145,7 +138,7 @@ export default function EmployeeEdit() {
   }, [loadData]);
 
   const handleSubmit = React.useCallback(
-    async (formValues: Partial<EmployeeFormState['values']>) => {
+    async (formValues) => {
       const updatedData = await updateEmployee(Number(employeeId), formValues);
       setEmployee(updatedData);
     },
@@ -187,8 +180,8 @@ export default function EmployeeEdit() {
     <PageContainer
       title={`Edit Employee ${employeeId}`}
       breadcrumbs={[
-        { title: 'Employees', path: '/employees' },
-        { title: `Employee ${employeeId}`, path: `/employees/${employeeId}` },
+        { title: 'Employees', path: '/admin-dashboard/employees' },
+        { title: `Employee ${employeeId}`, path: `/admin-dashboard/employees/${employeeId}` },
         { title: 'Edit' },
       ]}
     >

@@ -3,12 +3,11 @@ import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
-import { Outlet } from 'react-router';
 import DashboardHeader from './DashboardHeader';
 import DashboardSidebar from './DashboardSidebar';
 import SitemarkIcon from './SitemarkIcon';
 
-export default function DashboardLayout() {
+export default function DashboardLayout({ children }) {
   const theme = useTheme();
 
   const [isDesktopNavigationExpanded, setIsDesktopNavigationExpanded] =
@@ -23,7 +22,7 @@ export default function DashboardLayout() {
     : isMobileNavigationExpanded;
 
   const setIsNavigationExpanded = React.useCallback(
-    (newExpanded: boolean) => {
+    (newExpanded) => {
       if (isOverMdViewport) {
         setIsDesktopNavigationExpanded(newExpanded);
       } else {
@@ -38,13 +37,13 @@ export default function DashboardLayout() {
   );
 
   const handleToggleHeaderMenu = React.useCallback(
-    (isExpanded: boolean) => {
+    (isExpanded) => {
       setIsNavigationExpanded(isExpanded);
     },
     [setIsNavigationExpanded],
   );
 
-  const layoutRef = React.useRef<HTMLDivElement>(null);
+  const layoutRef = React.useRef(null);
 
   return (
     <Box
@@ -86,7 +85,7 @@ export default function DashboardLayout() {
             overflow: 'auto',
           }}
         >
-          <Outlet />
+          {children}
         </Box>
       </Box>
     </Box>

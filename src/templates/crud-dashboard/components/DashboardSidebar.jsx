@@ -1,16 +1,18 @@
 import * as React from 'react';
+import PropTypes from 'prop-types';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
 import List from '@mui/material/List';
 import Toolbar from '@mui/material/Toolbar';
-import type {} from '@mui/material/themeCssVarsAugmentation';
+
 import PersonIcon from '@mui/icons-material/Person';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import DescriptionIcon from '@mui/icons-material/Description';
 import LayersIcon from '@mui/icons-material/Layers';
-import { matchPath, useLocation } from 'react-router';
+import LogoutIcon from '@mui/icons-material/Logout';
+import { matchPath, useLocation, useNavigate } from 'react-router';
 import DashboardSidebarContext from '../context/DashboardSidebarContext';
 import { DRAWER_WIDTH, MINI_DRAWER_WIDTH } from '../constants';
 import DashboardSidebarPageItem from './DashboardSidebarPageItem';
@@ -21,24 +23,18 @@ import {
   getDrawerWidthTransitionMixin,
 } from '../mixins';
 
-export interface DashboardSidebarProps {
-  expanded?: boolean;
-  setExpanded: (expanded: boolean) => void;
-  disableCollapsibleSidebar?: boolean;
-  container?: Element;
-}
-
-export default function DashboardSidebar({
+function DashboardSidebar({
   expanded = true,
   setExpanded,
   disableCollapsibleSidebar = false,
   container,
-}: DashboardSidebarProps) {
+}) {
   const theme = useTheme();
+  const navigate = useNavigate();
 
   const { pathname } = useLocation();
 
-  const [expandedItemIds, setExpandedItemIds] = React.useState<string[]>([]);
+  const [expandedItemIds, setExpandedItemIds] = React.useState([]);
 
   const isOverSmViewport = useMediaQuery(theme.breakpoints.up('sm'));
   const isOverMdViewport = useMediaQuery(theme.breakpoints.up('md'));
@@ -77,14 +73,25 @@ export default function DashboardSidebar({
   const mini = !disableCollapsibleSidebar && !expanded;
 
   const handleSetSidebarExpanded = React.useCallback(
-    (newExpanded: boolean) => () => {
+    (newExpanded) => () => {
       setExpanded(newExpanded);
     },
     [setExpanded],
   );
 
+  const handleLogout = React.useCallback(() => {
+    // Limpiar localStorage/sessionStorage si se usa para tokens
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('user');
+    
+    // Redirigir al home
+    navigate('/');
+  }, [navigate]);
+
   const handlePageItemClick = React.useCallback(
-    (itemId: string, hasNestedNavigation: boolean) => {
+    (itemId, hasNestedNavigation) => {
       if (hasNestedNavigation && !mini) {
         setExpandedItemIds((previousValue) =>
           previousValue.includes(itemId)
@@ -104,7 +111,7 @@ export default function DashboardSidebar({
     isOverSmViewport && (!disableCollapsibleSidebar || isOverMdViewport);
 
   const getDrawerContent = React.useCallback(
-    (viewport: 'phone' | 'tablet' | 'desktop') => (
+    (viewport) => (
       <React.Fragment>
         <Toolbar />
         <Box
@@ -132,58 +139,39 @@ export default function DashboardSidebar({
               width: mini ? MINI_DRAWER_WIDTH : 'auto',
             }}
           >
-            <DashboardSidebarHeaderItem>Main items</DashboardSidebarHeaderItem>
+            <DashboardSidebarHeaderItem>Secciones</DashboardSidebarHeaderItem>
             <DashboardSidebarPageItem
-              id="employees"
-              title="Employees"
+              id="pedidos"
+              title="Pedidos"
+              icon={<DescriptionIcon />}
+              href="/admin-dashboard/pedidos"
+              selected={!!matchPath('/admin-dashboard/pedidos/*', pathname) || pathname === '/admin-dashboard'}
+            />
+            <DashboardSidebarPageItem
+              id="usuarios"
+              title="Usuarios"
               icon={<PersonIcon />}
-              href="/employees"
-              selected={!!matchPath('/employees/*', pathname) || pathname === '/'}
+              href="/admin-dashboard/usuarios"
+              selected={!!matchPath('/admin-dashboard/usuarios/*', pathname) || pathname === '/admin-dashboard'}
             />
             <DashboardSidebarDividerItem />
-            <DashboardSidebarHeaderItem>Example items</DashboardSidebarHeaderItem>
-            <DashboardSidebarPageItem
-              id="reports"
-              title="Reports"
-              icon={<BarChartIcon />}
-              href="/reports"
-              selected={!!matchPath('/reports', pathname)}
-              defaultExpanded={!!matchPath('/reports', pathname)}
-              expanded={expandedItemIds.includes('reports')}
-              nestedNavigation={
-                <List
-                  dense
-                  sx={{
-                    padding: 0,
-                    my: 1,
-                    pl: mini ? 0 : 1,
-                    minWidth: 240,
-                  }}
-                >
-                  <DashboardSidebarPageItem
-                    id="sales"
-                    title="Sales"
-                    icon={<DescriptionIcon />}
-                    href="/reports/sales"
-                    selected={!!matchPath('/reports/sales', pathname)}
-                  />
-                  <DashboardSidebarPageItem
-                    id="traffic"
-                    title="Traffic"
-                    icon={<DescriptionIcon />}
-                    href="/reports/traffic"
-                    selected={!!matchPath('/reports/traffic', pathname)}
-                  />
-                </List>
-              }
-            />
-            <DashboardSidebarPageItem
-              id="integrations"
-              title="Integrations"
-              icon={<LayersIcon />}
-              href="/integrations"
-              selected={!!matchPath('/integrations', pathname)}
-            />
+            
+            <DashboardSidebarDividerItem />
+            <Box
+              onClick={(e) => {
+                e.preventDefault();
+                handleLogout();
+              }}
+              sx={{ cursor: 'pointer' }}
+            >
+              <DashboardSidebarPageItem
+                id="logout"
+                title="Cerrar Sesión"
+                icon={<LogoutIcon />}
+                href="#"
+                selected={false}
+              />
+            </Box>
           </List>
         </Box>
       </React.Fragment>
@@ -192,7 +180,7 @@ export default function DashboardSidebar({
   );
 
   const getDrawerSharedSx = React.useCallback(
-    (isTemporary: boolean) => {
+    (isTemporary) => {
       const drawerWidth = mini ? MINI_DRAWER_WIDTH : DRAWER_WIDTH;
 
       return {
@@ -275,3 +263,20 @@ export default function DashboardSidebar({
     </DashboardSidebarContext.Provider>
   );
 }
+
+DashboardSidebar.propTypes = {
+  container: (props, propName) => {
+    if (props[propName] == null) {
+      return null;
+    }
+    if (typeof props[propName] !== 'object' || props[propName].nodeType !== 1) {
+      return new Error(`Expected prop '${propName}' to be of type Element`);
+    }
+    return null;
+  },
+  disableCollapsibleSidebar: PropTypes.bool,
+  expanded: PropTypes.bool,
+  setExpanded: PropTypes.func.isRequired,
+};
+
+export default DashboardSidebar;

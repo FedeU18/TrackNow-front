@@ -18,7 +18,6 @@ import useNotifications from '../hooks/useNotifications/useNotifications';
 import {
   deleteOne as deleteEmployee,
   getOne as getEmployee,
-  type Employee,
 } from '../data/employees';
 import PageContainer from './PageContainer';
 
@@ -29,9 +28,9 @@ export default function EmployeeShow() {
   const dialogs = useDialogs();
   const notifications = useNotifications();
 
-  const [employee, setEmployee] = React.useState<Employee | null>(null);
+  const [employee, setEmployee] = React.useState(null);
   const [isLoading, setIsLoading] = React.useState(true);
-  const [error, setError] = React.useState<Error | null>(null);
+  const [error, setError] = React.useState(null);
 
   const loadData = React.useCallback(async () => {
     setError(null);
@@ -42,7 +41,7 @@ export default function EmployeeShow() {
 
       setEmployee(showData);
     } catch (showDataError) {
-      setError(showDataError as Error);
+      setError(showDataError);
     }
     setIsLoading(false);
   }, [employeeId]);
@@ -52,7 +51,7 @@ export default function EmployeeShow() {
   }, [loadData]);
 
   const handleEmployeeEdit = React.useCallback(() => {
-    navigate(`/employees/${employeeId}/edit`);
+    navigate(`/admin-dashboard/employees/${employeeId}/edit`);
   }, [navigate, employeeId]);
 
   const handleEmployeeDelete = React.useCallback(async () => {
@@ -75,7 +74,7 @@ export default function EmployeeShow() {
       try {
         await deleteEmployee(Number(employeeId));
 
-        navigate('/employees');
+        navigate('/admin-dashboard/employees');
 
         notifications.show('Employee deleted successfully.', {
           severity: 'success',
@@ -83,7 +82,7 @@ export default function EmployeeShow() {
         });
       } catch (deleteError) {
         notifications.show(
-          `Failed to delete employee. Reason:' ${(deleteError as Error).message}`,
+          `Failed to delete employee. Reason:' ${deleteError.message}`,
           {
             severity: 'error',
             autoHideDuration: 3000,
@@ -95,7 +94,7 @@ export default function EmployeeShow() {
   }, [employee, dialogs, employeeId, navigate, notifications]);
 
   const handleBack = React.useCallback(() => {
-    navigate('/employees');
+    navigate('/admin-dashboard/employees');
   }, [navigate]);
 
   const renderShow = React.useMemo(() => {
@@ -212,7 +211,7 @@ export default function EmployeeShow() {
     <PageContainer
       title={pageTitle}
       breadcrumbs={[
-        { title: 'Employees', path: '/employees' },
+        { title: 'Employees', path: '/admin-dashboard/employees' },
         { title: pageTitle },
       ]}
     >

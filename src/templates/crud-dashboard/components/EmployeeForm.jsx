@@ -97,7 +97,7 @@ function EmployeeForm(props) {
   }, [formValues, onReset]);
 
   const handleBack = React.useCallback(() => {
-    navigate(backButtonPath ?? '/employees');
+    navigate(backButtonPath ?? '/admin-dashboard/employees');
   }, [navigate, backButtonPath]);
 
   return (
