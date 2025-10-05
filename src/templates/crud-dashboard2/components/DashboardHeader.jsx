@@ -104,7 +104,7 @@ function DashboardHeader({ logo, title, menuOpen, onToggleMenu }) {
             spacing={1}
             sx={{ marginLeft: 'auto' }}
           >
-            <Stack direction="row" alignItems="center">
+            <Stack direction="row" alignItems="center" spacing={1}>
               <ThemeSwitcher />
             </Stack>
           </Stack>

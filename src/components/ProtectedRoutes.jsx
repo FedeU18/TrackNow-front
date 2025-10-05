@@ -18,8 +18,9 @@ export const ProtectedRoute = ({ children, roles }) => {
   }
 
   //si hay roles definidos y el usuario no pertenece => redirigir a su dashboard
-  if (roles && !roles.includes(user?.rol)) {
-    const redirect = roleRedirects[user?.rol] || "/";
+  const userRole = user?.rol?.toLowerCase();
+  if (roles && !roles.includes(userRole)) {
+    const redirect = roleRedirects[userRole] || "/";
     return <Navigate to={redirect} replace />;
   }
 

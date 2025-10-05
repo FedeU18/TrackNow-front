@@ -6,17 +6,16 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { useNavigate, useParams } from 'react-router';
 import useNotifications from '../hooks/useNotifications/useNotifications';
 import {
-  getOne as getEmployee,
-  updateOne as updateEmployee,
-  validate as validateEmployee,
-} from '../data/employees';
-import EmployeeForm from './EmployeeForm';
+  getOne as getUsuario,
+  updateOne as updateUsuario,
+  validate as validateUsuario,
+} from '../data/usuarios';
+import UsuariosForm from './UsuariosForm';
 import PageContainer from './PageContainer';
 
-function EmployeeEditForm({ initialValues, onSubmit }) {
-  const { employeeId } = useParams();
+function UsuariosEditForm({ initialValues, onSubmit }) {
+  const { usuarioId } = useParams();
   const navigate = useNavigate();
-
   const notifications = useNotifications();
 
   const [formState, setFormState] = React.useState(() => ({
@@ -43,7 +42,7 @@ function EmployeeEditForm({ initialValues, onSubmit }) {
   const handleFormFieldChange = React.useCallback(
     (name, value) => {
       const validateField = async (values) => {
-        const { issues } = validateEmployee(values);
+        const { issues } = validateUsuario(values);
         setFormErrors({
           ...formErrors,
           [name]: issues?.find((issue) => issue.path?.[0] === name)?.message,
@@ -51,7 +50,6 @@ function EmployeeEditForm({ initialValues, onSubmit }) {
       };
 
       const newFormValues = { ...formValues, [name]: value };
-
       setFormValues(newFormValues);
       validateField(newFormValues);
     },
@@ -63,7 +61,7 @@ function EmployeeEditForm({ initialValues, onSubmit }) {
   }, [initialValues, setFormValues]);
 
   const handleFormSubmit = React.useCallback(async () => {
-    const { issues } = validateEmployee(formValues);
+    const { issues } = validateUsuario(formValues);
     if (issues && issues.length > 0) {
       setFormErrors(
         Object.fromEntries(issues.map((issue) => [issue.path?.[0], issue.message])),
@@ -74,14 +72,13 @@ function EmployeeEditForm({ initialValues, onSubmit }) {
 
     try {
       await onSubmit(formValues);
-      notifications.show('Employee edited successfully.', {
+      notifications.show('Usuario actualizado exitosamente.', {
         severity: 'success',
         autoHideDuration: 3000,
       });
-
-      navigate('/admin-dashboard/employees');
+      navigate('/admin-dashboard/usuarios');
     } catch (editError) {
-      notifications.show(`Failed to edit employee. Reason: ${editError.message}`, {
+      notifications.show(`Error al actualizar usuario. Razón: ${editError.message}`, {
         severity: 'error',
         autoHideDuration: 3000,
       });
@@ -90,32 +87,34 @@ function EmployeeEditForm({ initialValues, onSubmit }) {
   }, [formValues, navigate, notifications, onSubmit, setFormErrors]);
 
   return (
-    <EmployeeForm
+    <UsuariosForm
       formState={formState}
       onFieldChange={handleFormFieldChange}
       onSubmit={handleFormSubmit}
       onReset={handleFormReset}
-      submitButtonLabel="Save"
-      backButtonPath={`/admin-dashboard/employees/${employeeId}`}
+      submitButtonLabel="Guardar Cambios"
+      backButtonPath={`/admin-dashboard/usuarios/${usuarioId}`}
+      isEdit={true}
     />
   );
 }
 
-EmployeeEditForm.propTypes = {
+UsuariosEditForm.propTypes = {
   initialValues: PropTypes.shape({
-    age: PropTypes.number,
-    isFullTime: PropTypes.bool,
-    joinDate: PropTypes.string,
+    username: PropTypes.string,
     name: PropTypes.string,
-    role: PropTypes.oneOf(['Development', 'Finance', 'Market']),
+    email: PropTypes.string,
+    phone: PropTypes.string,
+    rol: PropTypes.oneOf(['admin', 'cliente', 'repartidor']),
+    confirmed: PropTypes.bool,
+    blocked: PropTypes.bool,
   }).isRequired,
   onSubmit: PropTypes.func.isRequired,
 };
 
-export default function EmployeeEdit() {
-  const { employeeId } = useParams();
-
-  const [employee, setEmployee] = React.useState(null);
+export default function UsuariosEdit() {
+  const { usuarioId } = useParams();
+  const [usuario, setUsuario] = React.useState(null);
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState(null);
 
@@ -124,14 +123,13 @@ export default function EmployeeEdit() {
     setIsLoading(true);
 
     try {
-      const showData = await getEmployee(Number(employeeId));
-
-      setEmployee(showData);
+      const showData = await getUsuario(Number(usuarioId));
+      setUsuario(showData);
     } catch (showDataError) {
       setError(showDataError);
     }
     setIsLoading(false);
-  }, [employeeId]);
+  }, [usuarioId]);
 
   React.useEffect(() => {
     loadData();
@@ -139,10 +137,10 @@ export default function EmployeeEdit() {
 
   const handleSubmit = React.useCallback(
     async (formValues) => {
-      const updatedData = await updateEmployee(Number(employeeId), formValues);
-      setEmployee(updatedData);
+      const updatedData = await updateUsuario(Number(usuarioId), formValues);
+      setUsuario(updatedData);
     },
-    [employeeId],
+    [usuarioId],
   );
 
   const renderEdit = React.useMemo(() => {
@@ -171,18 +169,18 @@ export default function EmployeeEdit() {
       );
     }
 
-    return employee ? (
-      <EmployeeEditForm initialValues={employee} onSubmit={handleSubmit} />
+    return usuario ? (
+      <UsuariosEditForm initialValues={usuario} onSubmit={handleSubmit} />
     ) : null;
-  }, [isLoading, error, employee, handleSubmit]);
+  }, [isLoading, error, usuario, handleSubmit]);
 
   return (
     <PageContainer
-      title={`Edit Employee ${employeeId}`}
+      title={`Editar Usuario #${usuarioId}`}
       breadcrumbs={[
-        { title: 'Employees', path: '/admin-dashboard/employees' },
-        { title: `Employee ${employeeId}`, path: `/admin-dashboard/employees/${employeeId}` },
-        { title: 'Edit' },
+        { title: 'Usuarios', path: '/admin-dashboard/usuarios' },
+        { title: `Usuario #${usuarioId}`, path: `/admin-dashboard/usuarios/${usuarioId}` },
+        { title: 'Editar' },
       ]}
     >
       <Box sx={{ display: 'flex', flex: 1 }}>{renderEdit}</Box>

@@ -105,7 +105,12 @@ export default function SignIn(props) {
         useAuthStore.getState().setUser(result.user);
 
         //redirigir segun rol
-        switch (result.user?.rol) {
+        const userRole = result.user?.rol;
+                
+        // Normalizar el rol a minúsculas para la comparación
+        const normalizedRole = userRole.toLowerCase();
+        
+        switch (normalizedRole) {
           case "admin":
             navigate("/admin-dashboard");
             break;

@@ -33,7 +33,22 @@ export const loginUser = async (identifier, password) => {
       identifier,//username o mail
       password,
     });
-    return response.data;
+    
+    // Obtener el perfil completo del usuario con el rol
+    const userProfile = await api.get("/users/me", {
+      headers: {
+        Authorization: `Bearer ${response.data.jwt}`,
+      },
+    });
+    
+    // Combinar los datos del login con el perfil completo
+    return {
+      ...response.data,
+      user: {
+        ...response.data.user,
+        ...userProfile.data,
+      }
+    };
   } catch (error) {
     console.error("Error al iniciar sesión:", error.response?.data || error);
     throw error;

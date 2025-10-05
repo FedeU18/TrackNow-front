@@ -1,27 +1,29 @@
-import * as React from 'react';
-import PropTypes from 'prop-types';
-import { useTheme } from '@mui/material/styles';
-import useMediaQuery from '@mui/material/useMediaQuery';
-import Box from '@mui/material/Box';
-import Drawer from '@mui/material/Drawer';
-import List from '@mui/material/List';
-import Toolbar from '@mui/material/Toolbar';
+import * as React from "react";
+import PropTypes from "prop-types";
+import { useTheme } from "@mui/material/styles";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import Box from "@mui/material/Box";
+import Drawer from "@mui/material/Drawer";
+import List from "@mui/material/List";
+import Toolbar from "@mui/material/Toolbar";
 
-import PersonIcon from '@mui/icons-material/Person';
-import BarChartIcon from '@mui/icons-material/BarChart';
-import DescriptionIcon from '@mui/icons-material/Description';
-import LayersIcon from '@mui/icons-material/Layers';
-import LogoutIcon from '@mui/icons-material/Logout';
-import { matchPath, useLocation, useNavigate } from 'react-router';
-import DashboardSidebarContext from '../context/DashboardSidebarContext';
-import { DRAWER_WIDTH, MINI_DRAWER_WIDTH } from '../constants';
-import DashboardSidebarPageItem from './DashboardSidebarPageItem';
-import DashboardSidebarHeaderItem from './DashboardSidebarHeaderItem';
-import DashboardSidebarDividerItem from './DashboardSidebarDividerItem';
+import PersonIcon from "@mui/icons-material/Person";
+import BarChartIcon from "@mui/icons-material/BarChart";
+import DescriptionIcon from "@mui/icons-material/Description";
+import LayersIcon from "@mui/icons-material/Layers";
+import LogoutIcon from "@mui/icons-material/Logout";
+import { matchPath, useLocation } from "react-router";
+import DashboardSidebarContext from "../context/DashboardSidebarContext";
+import { DRAWER_WIDTH, MINI_DRAWER_WIDTH } from "../constants";
+import DashboardSidebarPageItem from "./DashboardSidebarPageItem";
+import DashboardSidebarHeaderItem from "./DashboardSidebarHeaderItem";
+import DashboardSidebarDividerItem from "./DashboardSidebarDividerItem";
 import {
   getDrawerSxTransitionMixin,
   getDrawerWidthTransitionMixin,
-} from '../mixins';
+} from "../mixins";
+import { useAuthStore } from "../../../store/auth";
+import { useNavigate } from "react-router";
 
 function DashboardSidebar({
   expanded = true,
@@ -30,14 +32,13 @@ function DashboardSidebar({
   container,
 }) {
   const theme = useTheme();
-  const navigate = useNavigate();
 
   const { pathname } = useLocation();
 
   const [expandedItemIds, setExpandedItemIds] = React.useState([]);
 
-  const isOverSmViewport = useMediaQuery(theme.breakpoints.up('sm'));
-  const isOverMdViewport = useMediaQuery(theme.breakpoints.up('md'));
+  const isOverSmViewport = useMediaQuery(theme.breakpoints.up("sm"));
+  const isOverMdViewport = useMediaQuery(theme.breakpoints.up("md"));
 
   const [isFullyExpanded, setIsFullyExpanded] = React.useState(expanded);
   const [isFullyCollapsed, setIsFullyCollapsed] = React.useState(!expanded);
@@ -71,24 +72,20 @@ function DashboardSidebar({
   }, [expanded, theme.transitions.duration.leavingScreen]);
 
   const mini = !disableCollapsibleSidebar && !expanded;
+  const navigate = useNavigate();
+  const { logout } = useAuthStore();
+
+  const handleLogout = React.useCallback(() => {
+    logout();
+    navigate('/login');
+  }, [logout, navigate]);
 
   const handleSetSidebarExpanded = React.useCallback(
     (newExpanded) => () => {
       setExpanded(newExpanded);
     },
-    [setExpanded],
+    [setExpanded]
   );
-
-  const handleLogout = React.useCallback(() => {
-    // Limpiar localStorage/sessionStorage si se usa para tokens
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    sessionStorage.removeItem('token');
-    sessionStorage.removeItem('user');
-    
-    // Redirigir al home
-    navigate('/');
-  }, [navigate]);
 
   const handlePageItemClick = React.useCallback(
     (itemId, hasNestedNavigation) => {
@@ -96,15 +93,15 @@ function DashboardSidebar({
         setExpandedItemIds((previousValue) =>
           previousValue.includes(itemId)
             ? previousValue.filter(
-                (previousValueItemId) => previousValueItemId !== itemId,
+                (previousValueItemId) => previousValueItemId !== itemId
               )
-            : [...previousValue, itemId],
+            : [...previousValue, itemId]
         );
       } else if (!isOverSmViewport && !hasNestedNavigation) {
         setExpanded(false);
       }
     },
-    [mini, setExpanded, isOverSmViewport],
+    [mini, setExpanded, isOverSmViewport]
   );
 
   const hasDrawerTransitions =
@@ -118,16 +115,16 @@ function DashboardSidebar({
           component="nav"
           aria-label={`${viewport.charAt(0).toUpperCase()}${viewport.slice(1)}`}
           sx={{
-            height: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-            overflow: 'auto',
-            scrollbarGutter: mini ? 'stable' : 'auto',
-            overflowX: 'hidden',
+            height: "100%",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+            overflow: "auto",
+            scrollbarGutter: mini ? "stable" : "auto",
+            overflowX: "hidden",
             pt: !mini ? 0 : 2,
             ...(hasDrawerTransitions
-              ? getDrawerSxTransitionMixin(isFullyExpanded, 'padding')
+              ? getDrawerSxTransitionMixin(isFullyExpanded, "padding")
               : {}),
           }}
         >
@@ -136,7 +133,7 @@ function DashboardSidebar({
             sx={{
               padding: mini ? 0 : 0.5,
               mb: 4,
-              width: mini ? MINI_DRAWER_WIDTH : 'auto',
+              width: mini ? MINI_DRAWER_WIDTH : "auto",
             }}
           >
             <DashboardSidebarHeaderItem>Secciones</DashboardSidebarHeaderItem>
@@ -145,24 +142,28 @@ function DashboardSidebar({
               title="Pedidos"
               icon={<DescriptionIcon />}
               href="/admin-dashboard/pedidos"
-              selected={!!matchPath('/admin-dashboard/pedidos/*', pathname) || pathname === '/admin-dashboard'}
+              selected={
+                !!matchPath("/admin-dashboard/pedidos/*", pathname) ||
+                pathname === "/admin-dashboard"
+              }
             />
             <DashboardSidebarPageItem
               id="usuarios"
               title="Usuarios"
               icon={<PersonIcon />}
               href="/admin-dashboard/usuarios"
-              selected={!!matchPath('/admin-dashboard/usuarios/*', pathname) || pathname === '/admin-dashboard'}
+              selected={
+                !!matchPath("/admin-dashboard/usuarios/*", pathname) ||
+                pathname === "/admin-dashboard"
+              }
             />
-            <DashboardSidebarDividerItem />
-            
             <DashboardSidebarDividerItem />
             <Box
               onClick={(e) => {
                 e.preventDefault();
                 handleLogout();
               }}
-              sx={{ cursor: 'pointer' }}
+              sx={{ cursor: "pointer" }}
             >
               <DashboardSidebarPageItem
                 id="logout"
@@ -176,7 +177,7 @@ function DashboardSidebar({
         </Box>
       </React.Fragment>
     ),
-    [mini, hasDrawerTransitions, isFullyExpanded, expandedItemIds, pathname],
+    [mini, hasDrawerTransitions, isFullyExpanded, expandedItemIds, pathname]
   );
 
   const getDrawerSharedSx = React.useCallback(
@@ -184,21 +185,21 @@ function DashboardSidebar({
       const drawerWidth = mini ? MINI_DRAWER_WIDTH : DRAWER_WIDTH;
 
       return {
-        displayPrint: 'none',
+        displayPrint: "none",
         width: drawerWidth,
         flexShrink: 0,
         ...getDrawerWidthTransitionMixin(expanded),
-        ...(isTemporary ? { position: 'absolute' } : {}),
+        ...(isTemporary ? { position: "absolute" } : {}),
         [`& .MuiDrawer-paper`]: {
-          position: 'absolute',
+          position: "absolute",
           width: drawerWidth,
-          boxSizing: 'border-box',
-          backgroundImage: 'none',
+          boxSizing: "border-box",
+          backgroundImage: "none",
           ...getDrawerWidthTransitionMixin(expanded),
         },
       };
     },
-    [expanded, mini],
+    [expanded, mini]
   );
 
   const sidebarContextValue = React.useMemo(() => {
@@ -229,36 +230,36 @@ function DashboardSidebar({
         }}
         sx={{
           display: {
-            xs: 'block',
-            sm: disableCollapsibleSidebar ? 'block' : 'none',
-            md: 'none',
+            xs: "block",
+            sm: disableCollapsibleSidebar ? "block" : "none",
+            md: "none",
           },
           ...getDrawerSharedSx(true),
         }}
       >
-        {getDrawerContent('phone')}
+        {getDrawerContent("phone")}
       </Drawer>
       <Drawer
         variant="permanent"
         sx={{
           display: {
-            xs: 'none',
-            sm: disableCollapsibleSidebar ? 'none' : 'block',
-            md: 'none',
+            xs: "none",
+            sm: disableCollapsibleSidebar ? "none" : "block",
+            md: "none",
           },
           ...getDrawerSharedSx(false),
         }}
       >
-        {getDrawerContent('tablet')}
+        {getDrawerContent("tablet")}
       </Drawer>
       <Drawer
         variant="permanent"
         sx={{
-          display: { xs: 'none', md: 'block' },
+          display: { xs: "none", md: "block" },
           ...getDrawerSharedSx(false),
         }}
       >
-        {getDrawerContent('desktop')}
+        {getDrawerContent("desktop")}
       </Drawer>
     </DashboardSidebarContext.Provider>
   );
@@ -269,7 +270,7 @@ DashboardSidebar.propTypes = {
     if (props[propName] == null) {
       return null;
     }
-    if (typeof props[propName] !== 'object' || props[propName].nodeType !== 1) {
+    if (typeof props[propName] !== "object" || props[propName].nodeType !== 1) {
       return new Error(`Expected prop '${propName}' to be of type Element`);
     }
     return null;

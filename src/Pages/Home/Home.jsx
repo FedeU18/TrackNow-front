@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useEffect } from "react";
 import "./Home.css";
-import { Link as RouterLink } from "react-router-dom";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -9,6 +9,7 @@ import Stack from "@mui/material/Stack";
 import { styled } from "@mui/material/styles";
 import AppTheme from "../../templates/shared-theme/AppTheme";
 import ColorModeSelect from "../../templates/shared-theme/ColorModeSelect";
+import { useAuthStore } from "../../store/auth";
 
 const HomeContainer = styled(Stack)(({ theme }) => ({
   minHeight: "100vh",
@@ -19,6 +20,25 @@ const HomeContainer = styled(Stack)(({ theme }) => ({
 }));
 
 export default function Home(props) {
+  const navigate = useNavigate();
+  const { token, user } = useAuthStore();
+
+  // Redirigir al dashboard correspondiente si el usuario está logueado
+  useEffect(() => {
+    if (token && user && user.rol) {
+      const roleRedirects = {
+        cliente: "/cliente-dashboard",
+        repartidor: "/repartidor-dashboard", 
+        admin: "/admin-dashboard",
+      };
+      
+      const redirectPath = roleRedirects[user.rol.toLowerCase()];
+      if (redirectPath) {
+        navigate(redirectPath, { replace: true });
+      }
+    }
+  }, [token, user, navigate]);
+
   return (
     <AppTheme {...props}>
       <CssBaseline enableColorScheme />
@@ -92,15 +112,6 @@ export default function Home(props) {
             className="home-button"
           >
             Registrarse
-          </Button>
-          <Button
-            component={RouterLink}
-            to="/admin-dashboard"
-            variant="outlined"
-            size="large"
-            className="home-button"
-          >
-            Admin Dashboard
           </Button>
         </Box>
       </HomeContainer>

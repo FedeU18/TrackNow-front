@@ -5,23 +5,42 @@ import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import Tooltip from '@mui/material/Tooltip';
+import Chip from '@mui/material/Chip';
 import { DataGrid, GridActionsCellItem, gridClasses } from '@mui/x-data-grid';
 import AddIcon from '@mui/icons-material/Add';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+
 import { useLocation, useNavigate, useSearchParams } from 'react-router';
 import { useDialogs } from '../hooks/useDialogs/useDialogs';
 import useNotifications from '../hooks/useNotifications/useNotifications';
 import {
-  deleteOne as deleteEmployee,
-  getMany as getEmployees,
-} from '../data/employees';
+  deleteOne as deletePedido,
+  getMany as getPedidos,
+} from '../data/pedidos';
+
 import PageContainer from './PageContainer';
 
 const INITIAL_PAGE_SIZE = 10;
 
-export default function EmployeeList() {
+const getEstadoColor = (estado) => {
+  switch (estado) {
+    case 'Pendiente':
+      return { color: 'warning', label: 'Pendiente' };
+    case 'En curso':
+      return { color: 'info', label: 'En Curso' };
+    case 'Entregado':
+      return { color: 'success', label: 'Entregado' };
+    case 'Cancelado':
+      return { color: 'error', label: 'Cancelado' };
+    default:
+      return { color: 'default', label: estado };
+  }
+};
+
+export default function PedidosList() {
   const { pathname } = useLocation();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -114,7 +133,7 @@ export default function EmployeeList() {
     setIsLoading(true);
 
     try {
-      const listData = await getEmployees({
+      const listData = await getPedidos({
         paginationModel,
         sortModel,
         filterModel,
@@ -143,47 +162,56 @@ export default function EmployeeList() {
 
   const handleRowClick = React.useCallback(
     ({ row }) => {
-      navigate(`/admin-dashboard/employees/${row.id}`);
+      navigate(`/admin-dashboard/pedidos/${row.id}`);
     },
     [navigate],
   );
 
   const handleCreateClick = React.useCallback(() => {
-    navigate('/admin-dashboard/employees/new');
+    navigate('/admin-dashboard/pedidos/new');
   }, [navigate]);
 
+
+
+  const handleRowView = React.useCallback(
+    (pedido) => () => {
+      navigate(`/admin-dashboard/pedidos/${pedido.id}`);
+    },
+    [navigate],
+  );
+
   const handleRowEdit = React.useCallback(
-    (employee) => () => {
-      navigate(`/admin-dashboard/employees/${employee.id}/edit`);
+    (pedido) => () => {
+      navigate(`/admin-dashboard/pedidos/${pedido.id}/edit`);
     },
     [navigate],
   );
 
   const handleRowDelete = React.useCallback(
-    (employee) => async () => {
+    (pedido) => async () => {
       const confirmed = await dialogs.confirm(
-        `Do you wish to delete ${employee.name}?`,
+        `¿Deseas eliminar el pedido #${pedido.id}?`,
         {
-          title: `Delete employee?`,
+          title: `¿Eliminar pedido?`,
           severity: 'error',
-          okText: 'Delete',
-          cancelText: 'Cancel',
+          okText: 'Eliminar',
+          cancelText: 'Cancelar',
         },
       );
 
       if (confirmed) {
         setIsLoading(true);
         try {
-          await deleteEmployee(Number(employee.id));
+          await deletePedido(Number(pedido.id));
 
-          notifications.show('Employee deleted successfully.', {
+          notifications.show('Pedido eliminado exitosamente.', {
             severity: 'success',
             autoHideDuration: 3000,
           });
           loadData();
         } catch (deleteError) {
           notifications.show(
-            `Failed to delete employee. Reason:' ${deleteError.message}`,
+            `Error al eliminar pedido. Razón: ${deleteError.message}`,
             {
               severity: 'error',
               autoHideDuration: 3000,
@@ -205,69 +233,175 @@ export default function EmployeeList() {
 
   const columns = React.useMemo(
     () => [
-      { field: 'id', headerName: 'ID' },
-      { field: 'name', headerName: 'Name', width: 140 },
-      { field: 'age', headerName: 'Age', type: 'number' },
+      { field: 'id', headerName: 'ID', width: 80 },
       {
-        field: 'joinDate',
-        headerName: 'Join date',
-        type: 'date',
-        valueGetter: (value) => value && new Date(value),
-        width: 140,
+        field: 'direccion_origen',
+        headerName: 'Origen',
+        width: 200,
+        renderCell: (params) => (
+          <Tooltip title={params.value} placement="top">
+            <span style={{ 
+              overflow: 'hidden', 
+              textOverflow: 'ellipsis', 
+              whiteSpace: 'nowrap' 
+            }}>
+              {params.value}
+            </span>
+          </Tooltip>
+        ),
       },
       {
-        field: 'role',
-        headerName: 'Department',
-        type: 'singleSelect',
-        valueOptions: ['Market', 'Finance', 'Development'],
+        field: 'direccion_destino',
+        headerName: 'Destino',
+        width: 200,
+        renderCell: (params) => (
+          <Tooltip title={params.value} placement="top">
+            <span style={{ 
+              overflow: 'hidden', 
+              textOverflow: 'ellipsis', 
+              whiteSpace: 'nowrap' 
+            }}>
+              {params.value}
+            </span>
+          </Tooltip>
+        ),
+      },
+      {
+        field: 'cliente',
+        headerName: 'Cliente',
         width: 160,
+        valueGetter: (value) => {
+          if (!value) return 'Sin asignar';
+          return value.name || value.username || 'Sin nombre';
+        },
+        renderCell: (params) => {
+          const cliente = params.row.cliente;
+          if (!cliente) return 'Sin asignar';
+          
+          const displayName = cliente.name || cliente.username;
+          return (
+            <Tooltip title={`${displayName} (${cliente.email})`} placement="top">
+              <span>{displayName}</span>
+            </Tooltip>
+          );
+        },
       },
-      { field: 'isFullTime', headerName: 'Full-time', type: 'boolean' },
+      {
+        field: 'repartidor',
+        headerName: 'Repartidor',
+        width: 160,
+        valueGetter: (value) => {
+          if (!value) return 'Sin asignar';
+          return value.name || value.username || 'Sin nombre';
+        },
+        renderCell: (params) => {
+          const repartidor = params.row.repartidor;
+          if (!repartidor) return 'Sin asignar';
+          
+          const displayName = repartidor.name || repartidor.username;
+          return (
+            <Tooltip title={`${displayName} (${repartidor.email})`} placement="top">
+              <span>{displayName}</span>
+            </Tooltip>
+          );
+        },
+      },
+      {
+        field: 'estado',
+        headerName: 'Estado',
+        width: 120,
+        type: 'singleSelect',
+        valueOptions: ['Pendiente', 'En curso', 'Entregado', 'Cancelado'],
+        renderCell: (params) => {
+          const { color, label } = getEstadoColor(params.value);
+          return <Chip label={label} color={color} size="small" />;
+        },
+      },
+      {
+        field: 'fecha_creacion',
+        headerName: 'Fecha Creación',
+        type: 'dateTime',
+        width: 160,
+        valueGetter: (value) => value && new Date(value),
+        renderCell: (params) => {
+          if (!params.value) return '';
+          return new Date(params.value).toLocaleDateString('es-ES', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+          });
+        },
+      },
+      {
+        field: 'fecha_entrega',
+        headerName: 'Fecha Entrega',
+        type: 'dateTime',
+        width: 160,
+        valueGetter: (value) => value && new Date(value),
+        renderCell: (params) => {
+          if (!params.value) return 'Sin definir';
+          return new Date(params.value).toLocaleDateString('es-ES', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+          });
+        },
+      },
       {
         field: 'actions',
         type: 'actions',
-        flex: 1,
-        align: 'right',
+        headerName: 'Acciones',
+        width: 120,
         getActions: ({ row }) => [
+          <GridActionsCellItem
+            key="view-item"
+            icon={<VisibilityIcon />}
+            label="Ver"
+            onClick={handleRowView(row)}
+            showInMenu
+          />,
           <GridActionsCellItem
             key="edit-item"
             icon={<EditIcon />}
-            label="Edit"
+            label="Editar"
             onClick={handleRowEdit(row)}
+            showInMenu
           />,
           <GridActionsCellItem
             key="delete-item"
             icon={<DeleteIcon />}
-            label="Delete"
+            label="Eliminar"
             onClick={handleRowDelete(row)}
+            showInMenu
           />,
         ],
       },
     ],
-    [handleRowEdit, handleRowDelete],
+    [handleRowView, handleRowEdit, handleRowDelete],
   );
 
-  const pageTitle = 'Employees';
+  const pageTitle = 'Pedidos';
 
   return (
     <PageContainer
       title={pageTitle}
-      breadcrumbs={[{ title: pageTitle }]}
       actions={
         <Stack direction="row" alignItems="center" spacing={1}>
-          <Tooltip title="Reload data" placement="right" enterDelay={1000}>
+          <Tooltip title="Recargar datos" placement="right" enterDelay={1000}>
             <div>
               <IconButton size="small" aria-label="refresh" onClick={handleRefresh}>
                 <RefreshIcon />
               </IconButton>
             </div>
           </Tooltip>
+
           <Button
             variant="contained"
+            color="secondary"
             onClick={handleCreateClick}
             startIcon={<AddIcon />}
           >
-            Create
+            Nuevo Pedido
           </Button>
         </Stack>
       }
@@ -296,7 +430,6 @@ export default function EmployeeList() {
             onRowClick={handleRowClick}
             loading={isLoading}
             initialState={initialState}
-            showToolbar
             pageSizeOptions={[5, INITIAL_PAGE_SIZE, 25]}
             sx={{
               [`& .${gridClasses.columnHeader}, & .${gridClasses.cell}`]: {

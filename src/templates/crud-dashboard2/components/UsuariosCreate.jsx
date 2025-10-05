@@ -2,20 +2,25 @@ import * as React from 'react';
 import { useNavigate } from 'react-router';
 import useNotifications from '../hooks/useNotifications/useNotifications';
 import {
-  createOne as createEmployee,
-  validate as validateEmployee,
-} from '../data/employees';
-import EmployeeForm from './EmployeeForm';
+  createOne as createUsuario,
+  validate as validateUsuario,
+} from '../data/usuarios';
+import UsuariosForm from './UsuariosForm';
 import PageContainer from './PageContainer';
 
 const INITIAL_FORM_VALUES = {
-  role: 'Market',
-  isFullTime: true,
+  username: '',
+  name: '',
+  email: '',
+  phone: '',
+  password: '',
+  rol: 'cliente',
+  confirmed: false,
+  blocked: false,
 };
 
-export default function EmployeeCreate() {
+export default function UsuariosCreate() {
   const navigate = useNavigate();
-
   const notifications = useNotifications();
 
   const [formState, setFormState] = React.useState(() => ({
@@ -42,7 +47,7 @@ export default function EmployeeCreate() {
   const handleFormFieldChange = React.useCallback(
     (name, value) => {
       const validateField = async (values) => {
-        const { issues } = validateEmployee(values);
+        const { issues } = validateUsuario(values);
         setFormErrors({
           ...formErrors,
           [name]: issues?.find((issue) => issue.path?.[0] === name)?.message,
@@ -50,7 +55,6 @@ export default function EmployeeCreate() {
       };
 
       const newFormValues = { ...formValues, [name]: value };
-
       setFormValues(newFormValues);
       validateField(newFormValues);
     },
@@ -62,7 +66,7 @@ export default function EmployeeCreate() {
   }, [setFormValues]);
 
   const handleFormSubmit = React.useCallback(async () => {
-    const { issues } = validateEmployee(formValues);
+    const { issues } = validateUsuario(formValues);
     if (issues && issues.length > 0) {
       setFormErrors(
         Object.fromEntries(issues.map((issue) => [issue.path?.[0], issue.message])),
@@ -72,16 +76,15 @@ export default function EmployeeCreate() {
     setFormErrors({});
 
     try {
-      await createEmployee(formValues);
-      notifications.show('Employee created successfully.', {
+      await createUsuario(formValues);
+      notifications.show('Usuario creado exitosamente.', {
         severity: 'success',
         autoHideDuration: 3000,
       });
-
-      navigate('/admin-dashboard/employees');
+      navigate('/admin-dashboard/usuarios');
     } catch (createError) {
       notifications.show(
-        `Failed to create employee. Reason: ${createError.message}`,
+        `Error al crear usuario. Razón: ${createError.message}`,
         {
           severity: 'error',
           autoHideDuration: 3000,
@@ -93,15 +96,20 @@ export default function EmployeeCreate() {
 
   return (
     <PageContainer
-      title="New Employee"
-      breadcrumbs={[{ title: 'Employees', path: '/admin-dashboard/employees' }, { title: 'New' }]}
+      title="Nuevo Usuario"
+      breadcrumbs={[
+        { title: 'Usuarios', path: '/admin-dashboard/usuarios' }, 
+        { title: 'Nuevo' }
+      ]}
     >
-      <EmployeeForm
+      <UsuariosForm
         formState={formState}
         onFieldChange={handleFormFieldChange}
         onSubmit={handleFormSubmit}
         onReset={handleFormReset}
-        submitButtonLabel="Create"
+        submitButtonLabel="Crear Usuario"
+        backButtonPath="/admin-dashboard/usuarios"
+        isEdit={false}
       />
     </PageContainer>
   );
