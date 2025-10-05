@@ -8,6 +8,9 @@ import Divider from "@mui/material/Divider";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormLabel from "@mui/material/FormLabel";
 import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
 import Link from "@mui/material/Link";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
@@ -66,6 +69,7 @@ export default function SignUp(props) {
     name: "",
     email: "",
     password: "",
+    rol: "cliente",
   });
 
   const navigate = useNavigate();
@@ -110,10 +114,15 @@ export default function SignUp(props) {
     if (!validateInputs()) return;
 
     try {
-      const res = await registerUser(form.name, form.email, form.password);
+      const res = await registerUser(
+        form.name,
+        form.email,
+        form.password,
+        form.rol
+      );
       console.log("Usuario registrado:", res);
       setSuccess("Registro exitoso. Ahora podés iniciar sesión.");
-      setForm({ name: "", email: "", password: "" });
+      setForm({ name: "", email: "", password: "", rol: "cliente" });
       navigate("/login");
     } catch (err) {
       console.error("Error:", err.response?.data);
@@ -191,6 +200,23 @@ export default function SignUp(props) {
                   passwordError ? "Debe tener al menos 6 caracteres" : ""
                 }
               />
+            </FormControl>
+
+            <FormControl>
+              <FormLabel htmlFor="rol">Rol</FormLabel>
+              <Select
+                labelId="rol-label"
+                id="rol"
+                name="rol"
+                value={form.rol}
+                label="Rol"
+                onChange={handleChange}
+                fullWidth
+                required
+              >
+                <MenuItem value="cliente">Cliente</MenuItem>
+                <MenuItem value="repartidor">Repartidor</MenuItem>
+              </Select>
             </FormControl>
 
             {error && <Alert severity="error">{error}</Alert>}

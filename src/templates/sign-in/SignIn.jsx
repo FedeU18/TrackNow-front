@@ -17,6 +17,9 @@ import ForgotPassword from "./components/ForgotPassword";
 import AppTheme from "../shared-theme/AppTheme";
 import ColorModeSelect from "../shared-theme/ColorModeSelect";
 import { useNavigate } from "react-router-dom";
+import { useAuthStore } from "../../store/auth";
+import { loginUser } from "../../services/authService";
+import { Alert } from "@mui/material";
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
@@ -82,16 +85,42 @@ export default function SignIn(props) {
     setOpen(false);
   };
 
-  const handleSubmit = (event) => {
-    if (emailError || passwordError) {
-      event.preventDefault();
-      return;
-    }
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    if (!validateInputs()) return;
+
     const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get("email"),
-      password: data.get("password"),
-    });
+    const email = data.get("email");
+    const password = data.get("password");
+
+    try {
+      //logear
+      const result = await loginUser(email, password);
+
+      //guardar token y user
+      useAuthStore.getState().setToken(result.jwt);
+      useAuthStore.getState().setUser(result.user);
+
+      //redirigir seugn rol
+      switch (result.user.rol) {
+        case "admin":
+          navigate("/admin-dashboard");
+          break;
+        case "cliente":
+          navigate("/cliente-dashboard");
+          break;
+        case "repartidor":
+          navigate("/repartidor-dashboard");
+          break;
+        default:
+          alert("Rol no reconocido");
+          break;
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Credenciales incorrectas o error de conexión");
+    }
   };
 
   const validateInputs = () => {
@@ -121,6 +150,8 @@ export default function SignIn(props) {
     return isValid;
   };
 
+  const [errorMessage, setErrorMessage] = React.useState("");
+
   return (
     <AppTheme {...props}>
       <CssBaseline enableColorScheme />
@@ -148,6 +179,7 @@ export default function SignIn(props) {
               gap: 2,
             }}
           >
+            {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
             <FormControl>
               <FormLabel htmlFor="email">Email</FormLabel>
               <TextField
