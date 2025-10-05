@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { Alert } from "@mui/material";
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
@@ -15,7 +16,8 @@ import MuiCard from '@mui/material/Card';
 import { styled } from '@mui/material/styles';
 import AppTheme from '../shared-theme/AppTheme';
 import ColorModeSelect from '../shared-theme/ColorModeSelect';
-import { GoogleIcon, FacebookIcon, SitemarkIcon } from './components/CustomIcons';
+import { registerUser } from '../../services/authService';//aca conectmaos con strapi
+import { useNavigate } from "react-router-dom";
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
@@ -60,62 +62,63 @@ const SignUpContainer = styled(Stack)(({ theme }) => ({
 }));
 
 export default function SignUp(props) {
+  const [form, setForm] = React.useState({
+    name: '',
+    email: '',
+    password: '',
+  });
+
+  const navigate = useNavigate();
+
+  const [error, setError] = React.useState('');
+  const [success, setSuccess] = React.useState('');
+
   const [emailError, setEmailError] = React.useState(false);
-  const [emailErrorMessage, setEmailErrorMessage] = React.useState('');
   const [passwordError, setPasswordError] = React.useState(false);
-  const [passwordErrorMessage, setPasswordErrorMessage] = React.useState('');
   const [nameError, setNameError] = React.useState(false);
-  const [nameErrorMessage, setNameErrorMessage] = React.useState('');
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
   const validateInputs = () => {
-    const email = document.getElementById('email');
-    const password = document.getElementById('password');
-    const name = document.getElementById('name');
-
     let isValid = true;
+    setEmailError(false);
+    setPasswordError(false);
+    setNameError(false);
+    setError('');
+    setSuccess('');
 
-    if (!email.value || !/\S+@\S+\.\S+/.test(email.value)) {
-      setEmailError(true);
-      setEmailErrorMessage('Please enter a valid email address.');
-      isValid = false;
-    } else {
-      setEmailError(false);
-      setEmailErrorMessage('');
-    }
-
-    if (!password.value || password.value.length < 6) {
-      setPasswordError(true);
-      setPasswordErrorMessage('Password must be at least 6 characters long.');
-      isValid = false;
-    } else {
-      setPasswordError(false);
-      setPasswordErrorMessage('');
-    }
-
-    if (!name.value || name.value.length < 1) {
+    if (!form.name.trim()) {
       setNameError(true);
-      setNameErrorMessage('Name is required.');
       isValid = false;
-    } else {
-      setNameError(false);
-      setNameErrorMessage('');
+    }
+    if (!form.email || !/\S+@\S+\.\S+/.test(form.email)) {
+      setEmailError(true);
+      isValid = false;
+    }
+    if (!form.password || form.password.length < 6) {
+      setPasswordError(true);
+      isValid = false;
     }
 
     return isValid;
   };
 
-  const handleSubmit = (event) => {
-    if (nameError || emailError || passwordError) {
-      event.preventDefault();
-      return;
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (!validateInputs()) return;
+
+    try {
+      const res = await registerUser(form.name, form.email, form.password);
+      console.log("Usuario registrado:", res);
+      setSuccess("Registro exitoso. Ahora podés iniciar sesión.");
+      setForm({ name: '', email: '', password: '' });
+      navigate("/login");
+    } catch (err) {
+      console.error("Error:", err.response?.data);
+      setError(err.response?.data?.error?.message || "Error al registrarte.");
     }
-    const data = new FormData(event.currentTarget);
-    console.log({
-      name: data.get('name'),
-      lastName: data.get('lastName'),
-      email: data.get('email'),
-      password: data.get('password'),
-    });
   };
 
   return (
@@ -124,105 +127,92 @@ export default function SignUp(props) {
       <ColorModeSelect sx={{ position: 'fixed', top: '1rem', right: '1rem' }} />
       <SignUpContainer direction="column" justifyContent="space-between">
         <Card variant="outlined">
-          <SitemarkIcon />
           <Typography
             component="h1"
             variant="h4"
             sx={{ width: '100%', fontSize: 'clamp(2rem, 10vw, 2.15rem)' }}
           >
-            Sign up
+            Registro
           </Typography>
+
           <Box
             component="form"
             onSubmit={handleSubmit}
             sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
           >
             <FormControl>
-              <FormLabel htmlFor="name">Full name</FormLabel>
+              <FormLabel htmlFor="name">Nombre Completo</FormLabel>
               <TextField
-                autoComplete="name"
                 name="name"
                 required
                 fullWidth
                 id="name"
                 placeholder="Jon Snow"
+                value={form.name}
+                onChange={handleChange}
                 error={nameError}
-                helperText={nameErrorMessage}
-                color={nameError ? 'error' : 'primary'}
+                helperText={nameError ? 'El nombre es obligatorio' : ''}
               />
             </FormControl>
+
             <FormControl>
               <FormLabel htmlFor="email">Email</FormLabel>
               <TextField
+                name="email"
+                type="email"
                 required
                 fullWidth
                 id="email"
                 placeholder="your@email.com"
-                name="email"
-                autoComplete="email"
-                variant="outlined"
+                value={form.email}
+                onChange={handleChange}
                 error={emailError}
-                helperText={emailErrorMessage}
-                color={passwordError ? 'error' : 'primary'}
+                helperText={emailError ? 'Correo inválido' : ''}
               />
             </FormControl>
+
             <FormControl>
-              <FormLabel htmlFor="password">Password</FormLabel>
+              <FormLabel htmlFor="password">Contraseña</FormLabel>
               <TextField
+                name="password"
+                type="password"
                 required
                 fullWidth
-                name="password"
-                placeholder="••••••"
-                type="password"
                 id="password"
-                autoComplete="new-password"
-                variant="outlined"
+                placeholder="••••••"
+                value={form.password}
+                onChange={handleChange}
                 error={passwordError}
-                helperText={passwordErrorMessage}
-                color={passwordError ? 'error' : 'primary'}
+                helperText={
+                  passwordError ? 'Debe tener al menos 6 caracteres' : ''
+                }
               />
             </FormControl>
-            <FormControlLabel
-              control={<Checkbox value="allowExtraEmails" color="primary" />}
-              label="I want to receive updates via email."
-            />
+
+            {error && <Alert severity="error">{error}</Alert>}
+            {success && <Alert severity="success">{success}</Alert>}
+
+            <Button type="submit" fullWidth variant="contained">
+              Registrarse
+            </Button>
             <Button
-              type="submit"
               fullWidth
-              variant="contained"
-              onClick={validateInputs}
+              variant="outlined"
+              color="primary"
+              sx={{ mt: 2 }}
+              onClick={() => navigate("/")}
             >
-              Sign up
+              Volver al Home
             </Button>
           </Box>
-          <Divider>
-            <Typography sx={{ color: 'text.secondary' }}>or</Typography>
-          </Divider>
+
+          <Divider />
+
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <Button
-              fullWidth
-              variant="outlined"
-              onClick={() => alert('Sign up with Google')}
-              startIcon={<GoogleIcon />}
-            >
-              Sign up with Google
-            </Button>
-            <Button
-              fullWidth
-              variant="outlined"
-              onClick={() => alert('Sign up with Facebook')}
-              startIcon={<FacebookIcon />}
-            >
-              Sign up with Facebook
-            </Button>
             <Typography sx={{ textAlign: 'center' }}>
-              Already have an account?{' '}
-              <Link
-                href="/material-ui/getting-started/templates/sign-in/"
-                variant="body2"
-                sx={{ alignSelf: 'center' }}
-              >
-                Sign in
+              ¿Ya tenés una cuenta?{' '}
+              <Link href="/login" variant="body2" sx={{ alignSelf: 'center' }}>
+                Logeate
               </Link>
             </Typography>
           </Box>

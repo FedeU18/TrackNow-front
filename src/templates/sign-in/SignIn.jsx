@@ -16,11 +16,8 @@ import { styled } from "@mui/material/styles";
 import ForgotPassword from "./components/ForgotPassword";
 import AppTheme from "../shared-theme/AppTheme";
 import ColorModeSelect from "../shared-theme/ColorModeSelect";
-import {
-  GoogleIcon,
-  FacebookIcon,
-  SitemarkIcon,
-} from "./components/CustomIcons";
+import { useNavigate } from "react-router-dom";
+
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
@@ -75,6 +72,7 @@ export default function SignIn(props) {
   const [passwordError, setPasswordError] = React.useState(false);
   const [passwordErrorMessage, setPasswordErrorMessage] = React.useState("");
   const [open, setOpen] = React.useState(false);
+  const navigate = useNavigate();
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -131,13 +129,12 @@ export default function SignIn(props) {
           sx={{ position: "fixed", top: "1rem", right: "1rem" }}
         />
         <Card variant="outlined">
-          <SitemarkIcon />
           <Typography
             component="h1"
             variant="h4"
             sx={{ width: "100%", fontSize: "clamp(2rem, 10vw, 2.15rem)" }}
           >
-            Sign in
+            Login
           </Typography>
           <Box
             component="form"
@@ -168,7 +165,7 @@ export default function SignIn(props) {
               />
             </FormControl>
             <FormControl>
-              <FormLabel htmlFor="password">Password</FormLabel>
+              <FormLabel htmlFor="password">Contraseña</FormLabel>
               <TextField
                 error={passwordError}
                 helperText={passwordErrorMessage}
@@ -186,7 +183,7 @@ export default function SignIn(props) {
             </FormControl>
             <FormControlLabel
               control={<Checkbox value="remember" color="primary" />}
-              label="Remember me"
+              label="Recordarme"
             />
             <ForgotPassword open={open} handleClose={handleClose} />
             <Button
@@ -195,7 +192,7 @@ export default function SignIn(props) {
               variant="contained"
               onClick={validateInputs}
             >
-              Sign in
+              Login
             </Button>
             <Link
               component="button"
@@ -204,35 +201,28 @@ export default function SignIn(props) {
               variant="body2"
               sx={{ alignSelf: "center" }}
             >
-              Forgot your password?
+              ¿Olvidaste tu contraseña?
             </Link>
+            <Button
+              fullWidth
+              variant="outlined"
+              color="primary"
+              sx={{ mt: 2 }}
+              onClick={() => navigate("/")}
+            >
+                Volver al Home
+            </Button>
           </Box>
           <Divider>or</Divider>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <Button
-              fullWidth
-              variant="outlined"
-              onClick={() => alert("Sign in with Google")}
-              startIcon={<GoogleIcon />}
-            >
-              Sign in with Google
-            </Button>
-            <Button
-              fullWidth
-              variant="outlined"
-              onClick={() => alert("Sign in with Facebook")}
-              startIcon={<FacebookIcon />}
-            >
-              Sign in with Facebook
-            </Button>
             <Typography sx={{ textAlign: "center" }}>
-              Don&apos;t have an account?{" "}
+              ¿No tenés cuenta?{" "}
               <Link
-                href="/material-ui/getting-started/templates/sign-in/"
+                href="/register"
                 variant="body2"
                 sx={{ alignSelf: "center" }}
               >
-                Sign up
+                Registrate
               </Link>
             </Typography>
           </Box>
