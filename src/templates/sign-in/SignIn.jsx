@@ -94,33 +94,73 @@ export default function SignIn(props) {
     const email = data.get("email");
     const password = data.get("password");
 
-    try {
       //logear
-      const result = await loginUser(email, password);
+      try {
+        console.log("intentando login con", email);
+        const result = await loginUser(email, password);
+        console.log("result:", result);
 
-      //guardar token y user
-      useAuthStore.getState().setToken(result.jwt);
-      useAuthStore.getState().setUser(result.user);
+        //guardar token y user
+        useAuthStore.getState().setToken(result.jwt);
+        useAuthStore.getState().setUser(result.user);
 
-      //redirigir seugn rol
-      switch (result.user.rol) {
-        case "admin":
-          navigate("/admin-dashboard");
-          break;
-        case "cliente":
-          navigate("/cliente-dashboard");
-          break;
-        case "repartidor":
-          navigate("/repartidor-dashboard");
-          break;
-        default:
-          alert("Rol no reconocido");
-          break;
+        //redirigir segun rol
+        switch (result.user?.rol) {
+          case "admin":
+            navigate("/admin-dashboard");
+            break;
+          case "cliente":
+            navigate("/cliente-dashboard");
+            break;
+          case "repartidor":
+            navigate("/repartidor-dashboard");
+            break;
+          default:
+            setErrorMessage("Rol no reconocido");
+            break;
+        }
+      } catch (loginErr) {
+        console.error("Login error:", loginErr);
+        let readable = "Error al iniciar sesión";
+        const respData = loginErr.response?.data;
+
+        if (respData) {
+          if (typeof respData === "string") {
+            readable = respData;
+          } else if (respData.message) {
+            readable = respData.message;
+          } else if (respData.error?.message) {
+            readable = respData.error.message;
+          } else if (respData.error) {
+            readable = typeof respData.error === 'string' ? respData.error : JSON.stringify(respData.error);
+          } else {
+            readable = JSON.stringify(respData);
+          }
+        } else if (loginErr.message) {
+          readable = loginErr.message;
+        }
+
+        if (typeof readable === 'string') {
+          const lower = readable.toLowerCase();
+          let translated = null;
+
+          if (/invalid identifier(?: or password)?/i.test(readable)) {
+            translated = "Email o contraseña incorrectos.";
+          } else if (/invalid identifier/i.test(readable)) {
+            translated = "Email incorrecto.";
+          } else if (/validationerror/i.test(readable) || /validation error/i.test(readable)) {
+            translated = "Error de validación.";
+          } else if (/email.*not.*found/i.test(readable) || /user not found/i.test(readable)) {
+            translated = "Usuario no encontrado.";
+          }
+
+          const display = translated || (typeof readable === 'string' ? readable.replace(/\r|\n/g, ' ').trim() : String(readable));
+
+          setErrorMessage(display);
+        } else {
+          setErrorMessage("Error al iniciar sesión");
+        }
       }
-    } catch (error) {
-      console.error(error);
-      alert("Credenciales incorrectas o error de conexión");
-    }
   };
 
   const validateInputs = () => {
@@ -131,7 +171,7 @@ export default function SignIn(props) {
 
     if (!email.value || !/\S+@\S+\.\S+/.test(email.value)) {
       setEmailError(true);
-      setEmailErrorMessage("Please enter a valid email address.");
+      setEmailErrorMessage("Por favor ingrese un email válido.");
       isValid = false;
     } else {
       setEmailError(false);
@@ -140,11 +180,22 @@ export default function SignIn(props) {
 
     if (!password.value || password.value.length < 6) {
       setPasswordError(true);
-      setPasswordErrorMessage("Password must be at least 6 characters long.");
+      setPasswordErrorMessage("La contraseña tiene que ser al menos de 6 caracteres de largo.");
       isValid = false;
     } else {
       setPasswordError(false);
       setPasswordErrorMessage("");
+    }
+
+    if(!password.value) {
+      setPasswordErrorMessage("Por favor ingrese su contraseña.");
+      isValid = false;
+    }
+
+
+    if (!email.value) {
+      setEmailErrorMessage("Por favor ingrese su email.");
+      isValid = false;
     }
 
     return isValid;
