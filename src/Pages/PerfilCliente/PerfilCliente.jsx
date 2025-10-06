@@ -16,6 +16,9 @@ import {
   TableHead,
   TableRow,
   Paper,
+  TextField,
+  MenuItem,
+  Stack,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
@@ -24,6 +27,9 @@ export default function PerfilCliente() {
   const [perfil, setPerfil] = useState(null);
   const [pedidos, setPedidos] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [filtroEstado, setFiltroEstado] = useState("");
+  const [filtroRepartidor, setFiltroRepartidor] = useState("");
+  const [buscar, setBuscar] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -63,8 +69,30 @@ export default function PerfilCliente() {
       </Box>
     );
 
+  // 🧠 Lógica de filtros en el frontend
+  const pedidosFiltrados = pedidos.filter((pedido) => {
+    const coincideEstado =
+      !filtroEstado ||
+      pedido.estado?.toLowerCase() === filtroEstado.toLowerCase();
+    const coincideRepartidor =
+      !filtroRepartidor ||
+      pedido.id_repartidor?.username
+        ?.toLowerCase()
+        .includes(filtroRepartidor.toLowerCase());
+    const coincideBusqueda =
+      !buscar ||
+      pedido.direccion_origen?.toLowerCase().includes(buscar.toLowerCase()) ||
+      pedido.direccion_destino?.toLowerCase().includes(buscar.toLowerCase()) ||
+      pedido.estado?.toLowerCase().includes(buscar.toLowerCase()) ||
+      pedido.id_repartidor?.username
+        ?.toLowerCase()
+        .includes(buscar.toLowerCase());
+
+    return coincideEstado && coincideRepartidor && coincideBusqueda;
+  });
+
   return (
-    <Box sx={{ minHeight: "100vh", p: 3 }}>
+    <Box sx={{ minHeight: "100vh", p: 3, backgroundColor: "#f9f9f9" }}>
       <Card sx={{ mb: 4 }}>
         <CardContent>
           <Typography variant="h4" gutterBottom>
@@ -73,10 +101,53 @@ export default function PerfilCliente() {
         </CardContent>
       </Card>
 
-      <Typography variant="h6" gutterBottom>
+      <Typography variant="h6" gutterBottom sx={{ color: "black" }}>
         🧾 Tus pedidos
       </Typography>
 
+      {/* 🔍 Filtros Frontend */}
+      <Stack
+        direction={{ xs: "column", sm: "row" }}
+        spacing={2}
+        sx={{ mb: 3, maxWidth: "900px" }}
+      >
+        <TextField
+          label="Buscar"
+          variant="outlined"
+          size="small"
+          value={buscar}
+          onChange={(e) => setBuscar(e.target.value)}
+          placeholder="Buscar por dirección, estado o repartidor..."
+          fullWidth
+        />
+
+        <TextField
+          select
+          label="Estado"
+          variant="outlined"
+          size="small"
+          value={filtroEstado}
+          onChange={(e) => setFiltroEstado(e.target.value)}
+          sx={{ minWidth: 180 }}
+        >
+          <MenuItem value="">Todos</MenuItem>
+          <MenuItem value="Pendiente">Pendiente</MenuItem>
+          <MenuItem value="En curso">En curso</MenuItem>
+          <MenuItem value="Entregado">Entregado</MenuItem>
+          <MenuItem value="Cancelado">Cancelado</MenuItem>
+        </TextField>
+
+        <TextField
+          label="Repartidor"
+          variant="outlined"
+          size="small"
+          value={filtroRepartidor}
+          onChange={(e) => setFiltroRepartidor(e.target.value)}
+          placeholder="Nombre del repartidor"
+        />
+      </Stack>
+
+      {/* 📋 Tabla */}
       <TableContainer
         component={Paper}
         elevation={3}
@@ -113,15 +184,15 @@ export default function PerfilCliente() {
           </TableHead>
 
           <TableBody>
-            {pedidos.length > 0 ? (
-              pedidos.map((pedido) => (
+            {pedidosFiltrados.length > 0 ? (
+              pedidosFiltrados.map((pedido) => (
                 <TableRow
                   key={pedido.id}
                   sx={{
                     transition: "all 0.25s ease",
                     "&:hover": {
                       backgroundColor: "#2b2b2b",
-                      "& td": { color: "white" }, // 👈 esto pinta el texto blanco
+                      "& td": { color: "white" },
                     },
                   }}
                 >
@@ -144,7 +215,7 @@ export default function PerfilCliente() {
             ) : (
               <TableRow>
                 <TableCell colSpan={6} align="center">
-                  No hay pedidos registrados.
+                  No hay pedidos que coincidan con los filtros.
                 </TableCell>
               </TableRow>
             )}
