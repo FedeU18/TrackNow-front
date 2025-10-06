@@ -1,5 +1,5 @@
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
-import './App.css'
+import "./App.css";
 import Home from "./Pages/Home/Home";
 import AdminDashboard from "./Pages/AdminDashboard/AdminDashboard";
 import Footer from "./components/Footer/Footer";
@@ -8,10 +8,11 @@ import SignUp from "./templates/sign-up/SignUp";
 import ClienteDashboard from "./Pages/ClienteDashboard/ClienteDashboard";
 import RepartidorDashboard from "./Pages/RepartidorDashboard/RepartidorDashboard";
 import { ProtectedRoute } from "./components/ProtectedRoutes";
+import PerfilCliente from "./Pages/PerfilCliente/PerfilCliente"; // 👈 importar el perfil
 
 function AppContent() {
   const location = useLocation();
-  const hideFooter = location.pathname.startsWith('/admin-dashboard');
+  const hideFooter = location.pathname.startsWith("/admin-dashboard");
 
   return (
     <>
@@ -20,7 +21,7 @@ function AppContent() {
         <Route path="/login" element={<SignIn />} />
         <Route path="/register" element={<SignUp />} />
 
-        {/*Dashboards protegidos*/}
+        {/* Dashboards protegidos */}
         <Route
           path="/admin-dashboard/*"
           element={
@@ -29,14 +30,19 @@ function AppContent() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/cliente-dashboard/*"
           element={
             <ProtectedRoute roles={["cliente"]}>
-              <ClienteDashboard />
+              <Routes>
+                <Route path="" element={<ClienteDashboard />} />
+                <Route path="perfil" element={<PerfilCliente />} />
+              </Routes>
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/repartidor-dashboard/*"
           element={
@@ -46,6 +52,7 @@ function AppContent() {
           }
         />
       </Routes>
+
       {!hideFooter && <Footer />}
     </>
   );

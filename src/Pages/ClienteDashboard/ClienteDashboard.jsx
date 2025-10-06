@@ -46,10 +46,24 @@ export default function ClienteDashboard() {
               Desde aquí podrás realizar y gestionar tus pedidos.
             </Typography>
 
-            <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ mb: 3 }}>
-              <Button variant="contained" color="primary">Hacer Pedido</Button>
-              <Button variant="outlined" color="primary">Mis Pedidos</Button>
-              <Button variant="outlined" color="primary">Mi Perfil</Button>
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              spacing={2}
+              sx={{ mb: 3 }}
+            >
+              <Button variant="contained" color="primary">
+                Hacer Pedido
+              </Button>
+              <Button variant="outlined" color="primary">
+                Mis Pedidos
+              </Button>
+              <Button
+                onClick={() => navigate("/cliente-dashboard/perfil")}
+                variant="outlined"
+                color="primary"
+              >
+                Mi Perfil
+              </Button>
             </Stack>
 
             <Button variant="text" color="error" onClick={handleLogout}>
