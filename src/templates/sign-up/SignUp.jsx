@@ -125,8 +125,31 @@ export default function SignUp(props) {
       setForm({ name: "", email: "", password: "", rol: "cliente" });
       navigate("/login");
     } catch (err) {
-      console.error("Error:", err.response?.data);
-      setError(err.response?.data?.error?.message || "Error al registrarte.");
+      console.error("Error registrando usuario:", err.response?.data || err.message || err);
+
+      const resp = err.response?.data;
+      let readable = "Error al registrarte.";
+
+      if (resp) {
+        if (typeof resp === 'string') readable = resp;
+        else if (resp.message) readable = resp.message;
+        else if (resp.error?.message) readable = resp.error.message;
+        else if (resp.error) readable = typeof resp.error === 'string' ? resp.error : JSON.stringify(resp.error);
+        else readable = JSON.stringify(resp);
+      } else if (err.message) {
+        readable = err.message;
+      }
+
+      const txt = String(readable).toLowerCase();
+      if (/email.*(already|taken|exists|in use|ya está en uso|ya existe)/i.test(txt)) {
+        setError('El email ya está en uso.');
+      } else if (/username.*(already|taken|exists|ya existe|ya está en uso)/i.test(txt)) {
+        setError('El nombre de usuario ya está en uso.');
+      } else if (/validationerror|validation error/i.test(txt)) {
+        setError('Error de validación. Verifique los campos.');
+      } else {
+        setError(readable);
+      }
     }
   };
 
